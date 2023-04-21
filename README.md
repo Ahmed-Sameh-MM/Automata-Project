@@ -1,11 +1,14 @@
 # Automata & Compatibility Project
 
 ## Dependencies
-```
-```
-
-## Configuration
-```
+```python
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.uic import loadUi
+import pydot
+import os
+from collections import defaultdict
+import graphviz
+import atexit
 ```
 
 ## [Part 1]
