@@ -127,7 +127,7 @@
         <x>10</x>
         <y>20</y>
         <width>241</width>
-        <height>88</height>
+        <height>81</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -221,10 +221,10 @@
    <widget class="QScrollArea" name="scrollArea">
     <property name="geometry">
      <rect>
-      <x>9</x>
-      <y>56</y>
+      <x>10</x>
+      <y>60</y>
       <width>981</width>
-      <height>531</height>
+      <height>521</height>
      </rect>
     </property>
     <property name="widgetResizable">
@@ -236,7 +236,7 @@
        <x>0</x>
        <y>0</y>
        <width>979</width>
-       <height>529</height>
+       <height>519</height>
       </rect>
      </property>
      <widget class="QLabel" name="frame">
@@ -245,7 +245,7 @@
         <x>0</x>
         <y>0</y>
         <width>981</width>
-        <height>531</height>
+        <height>521</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -255,46 +255,48 @@
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QPushButton" name="zoomInBtn">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>31</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>../Resources/ZoomIn.png</normaloff>../Resources/ZoomIn.png</iconset>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="zoomOutBtn">
-      <property name="geometry">
-       <rect>
-        <x>50</x>
-        <y>10</y>
-        <width>31</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>../Resources/ZoomOut.png</normaloff>../Resources/ZoomOut.png</iconset>
-      </property>
-     </widget>
     </widget>
+   </widget>
+   <widget class="QPushButton" name="zoomInBtn">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>70</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normaloff>../Resources/ZoomIn.png</normaloff>../Resources/ZoomIn.png</iconset>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="zoomOutBtn">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>70</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normaloff>../Resources/ZoomOut.png</normaloff>../Resources/ZoomOut.png</iconset>
+    </property>
    </widget>
    <zorder>inputMenu</zorder>
    <zorder>scrollArea</zorder>
    <zorder>backBtn</zorder>
    <zorder>label</zorder>
+   <zorder>zoomInBtn</zorder>
+   <zorder>zoomOutBtn</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
