@@ -291,12 +291,30 @@
       <normaloff>../Resources/ZoomOut.png</normaloff>../Resources/ZoomOut.png</iconset>
     </property>
    </widget>
+   <widget class="QPushButton" name="downloadBtn">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>70</y>
+      <width>31</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset>
+      <normaloff>../Resources/download.png</normaloff>../Resources/download.png</iconset>
+    </property>
+   </widget>
    <zorder>inputMenu</zorder>
    <zorder>scrollArea</zorder>
    <zorder>backBtn</zorder>
    <zorder>label</zorder>
    <zorder>zoomInBtn</zorder>
    <zorder>zoomOutBtn</zorder>
+   <zorder>downloadBtn</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

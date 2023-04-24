@@ -8,8 +8,8 @@ import atexit
 
 
 def cleanFiles():
-    os.remove(resource_path("Resources/graph.png"))
-    os.remove(resource_path("Resources/graph.dot"))
+    os.remove("Resources/graph.png")
+    os.remove("Resources/graph.dot")
 
 
 def resource_path(relative_path):
@@ -52,6 +52,7 @@ class GraphInputWindow(QtWidgets.QMainWindow):
         self.addEdgesBtn.clicked.connect(lambda: self.addChoose_click(2))
         self.zoomInBtn.clicked.connect(lambda: self.zoom(True))
         self.zoomOutBtn.clicked.connect(lambda: self.zoom(False))
+        self.downloadBtn.clicked.connect(self.download_click)
         self.graphEdges = {}
         self.graphEdges = defaultdict(lambda: list(), self.graphEdges)
         self.startNode = ""
@@ -94,8 +95,8 @@ class GraphInputWindow(QtWidgets.QMainWindow):
             for edge in dotGraph.get_edges():
                 if edge.get_source() == '""': continue
                 self.graphEdges[(edge.get_source(), edge.get_destination())].append(edge.get('label').replace('"', "").replace(' ', ""))
-        dotGraph.write_png(resource_path("Resources/graph.png"))
-        self.frame.setPixmap(QtGui.QPixmap(resource_path("Resources/graph.png")))
+        dotGraph.write_png("Resources/graph.png")
+        self.frame.setPixmap(QtGui.QPixmap("Resources/graph.png"))
 
     def addEdge_click(self):
         if self.convertCheck:
@@ -163,7 +164,7 @@ class GraphInputWindow(QtWidgets.QMainWindow):
     def zoom(self, check):
         if check:self.scale += 0.1
         else:self.scale -= 0.1
-        pixmap = QtGui.QPixmap(resource_path("Resources/graph.png"))
+        pixmap = QtGui.QPixmap("Resources/graph.png")
         pixmapSize = pixmap.size()
         newpixmap = pixmap.scaled(self.scale * pixmapSize, QtCore.Qt.KeepAspectRatio)
         self.frame.setPixmap(newpixmap)
@@ -225,6 +226,18 @@ class GraphInputWindow(QtWidgets.QMainWindow):
         self.startNode = ""
         self.finalNodes = []
         self.draw_graph()
+
+    def download_click(self):
+        try:
+            options = QtWidgets.QFileDialog.Options()
+            options |= QtWidgets.QFileDialog.DontUseNativeDialog
+            fileName, _ = QtWidgets.QFileDialog.getSaveFileName(
+                self, "Save Image", r"H:\Image", "All Files (*)", options=options
+            )
+            QtGui.QPixmap("Resources/graph.png").save(fileName+".png", "PNG")
+        except Exception as e:
+            print(e)
+            self.error_popup("You should input a graph first!")
 
 
 if __name__ == "__main__":
