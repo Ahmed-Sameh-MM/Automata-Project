@@ -169,7 +169,7 @@ class GraphInputWindow(QtWidgets.QMainWindow):
         newpixmap = pixmap.scaled(self.scale * pixmapSize, QtCore.Qt.KeepAspectRatio)
         self.frame.setPixmap(newpixmap)
 
-    def convert_click(self):
+    def convert_click(self, v=False):
         self.convertCheck = True
         if len(self.finalNodes) == 0 or not(self.startNode):
             self.error_popup("Please Make Sure there is One Starting state and At least One Final State!")
@@ -181,7 +181,11 @@ class GraphInputWindow(QtWidgets.QMainWindow):
             while nonVisitedNodes:
                 currNode = nonVisitedNodes.pop()
                 if currNode in visitedNodes: continue
+                if v:print(f"Curr Node is {currNode}")
                 visitedNodes.append(currNode)
+                if v:print(f"{currNode} added to visited\n")
+                if v:print(f"Curr Visited Nodes {visitedNodes}")
+                if v:print(f"Curr Non Visited Nodes {nonVisitedNodes}\n")
                 miniTrans = defaultdict(lambda: list())
                 for node in currNode:
                     for transition, nodes in self.transitionTable[node].items():
@@ -189,9 +193,13 @@ class GraphInputWindow(QtWidgets.QMainWindow):
                         miniTrans[transition] = [*set(miniTrans[transition])]
                 for transition, nodes in miniTrans.items():
                     self.dfaTable[str(currNode)][str(transition)] = str(nodes)
+                    if v:print(f"Adding Rule to table {currNode}\n\t{transition} -> {nodes}\n")
                     if self.finalNodes[0] in nodes: self.finalNodes.append(nodes)
-                    if (nodes in visitedNodes) or (nodes == currNode):continue
+                    if (nodes in visitedNodes) or (nodes == currNode) or (nodes in nonVisitedNodes):continue
+                    if v:print(f"Appending {nodes} to Non Visited Nodes\n")
                     nonVisitedNodes.append(nodes)
+                    if v:print(f"Curr Visited Nodes {visitedNodes}")
+                    if v:print(f"Curr Non Visited Nodes {nonVisitedNodes}\n")
             self.displayDFA()
         except Exception as e:
             print(e)
