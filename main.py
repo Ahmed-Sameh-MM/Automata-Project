@@ -261,4 +261,5 @@ if __name__ == "__main__":
     MainWidget.setWindowIcon(QtGui.QIcon(resource_path("Resources/logo.png")))
     MainWidget.show()
     atexit.register(cleanFiles)
+    os.environ["PATH"] += os.pathsep + resource_path('bin')
     sys.exit(app.exec_())
