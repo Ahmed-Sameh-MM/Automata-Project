@@ -25,7 +25,7 @@ The report should also include:
 
 ## [Part 2]
 ```
-1- A Java program to:
+1- A Python program to:
 	 1- convert any non-deterministic finite automaton to deterministic finite automaton
 	 2- convert context free grammar to Pushdown automaton
 2- A Documentation for the program with screenshots of the output
