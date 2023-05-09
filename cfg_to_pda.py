@@ -7,7 +7,7 @@ import sys
 
 
 def clean_files():
-    os.remove("Resources/PDA.png")
+    os.remove("Resources/PDA.svg")
     os.remove("Resources/PDA.dot")
 
 
@@ -60,8 +60,9 @@ class CFG:
                     self.startingSymbol = variable
 
     def construct_pda(self):
+        self.graphvizGraph.attr(rankdir="LR")
         self.graphvizGraph.node("qStart", color="red", fontcolor="red")
-        self.graphvizGraph.node("qAccept", color="darkgreen", fontcolor="darkgreen")
+        self.graphvizGraph.node("qAccept", color="darkgreen", fontcolor="darkgreen", shape="doublecircle")
         self.graphvizGraph.node("qLoop", color="blue", fontcolor="blue")
 
         self.graphvizGraph.edge("qStart", "q1", label=" (ε, ε -> $)")
@@ -99,7 +100,7 @@ class CFG:
 
         self.graphvizGraph.save(filename="Resources/PDA.dot")
         dotGraph = pydot.graph_from_dot_file("Resources/PDA.dot")[0]
-        dotGraph.write_png("Resources/PDA.png")
+        dotGraph.write_svg("Resources/PDA.svg")
 
     def __str__(self):
         out_str = ""
@@ -118,6 +119,6 @@ if __name__ == "__main__":
     # rules = ["S -> Aaa", "A -> Bbb", "B -> c"]
     rules = ["S -> aSb", "S -> A", "A -> aA", "A -> ε"]
     grammar = CFG()
-    grammar.init_grammar(rules)
+    grammar.init_grammar(rules, "S")
 
     grammar.construct_pda()

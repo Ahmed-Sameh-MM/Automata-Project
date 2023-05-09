@@ -8,7 +8,7 @@ import atexit
 
 
 def cleanFiles():
-    os.remove("Resources/graph.png")
+    os.remove("Resources/graph.svg")
     os.remove("Resources/graph.dot")
 
 
@@ -95,8 +95,8 @@ class GraphInputWindow(QtWidgets.QMainWindow):
             for edge in dotGraph.get_edges():
                 if edge.get_source() == '""': continue
                 self.graphEdges[(edge.get_source(), edge.get_destination())].append(edge.get('label').replace('"', "").replace(' ', ""))
-        dotGraph.write_png("Resources/graph.png")
-        self.frame.setPixmap(QtGui.QPixmap("Resources/graph.png"))
+        dotGraph.write_svg("Resources/graph.svg")
+        self.frame.setPixmap(QtGui.QPixmap("Resources/graph.svg"))
 
     def addEdge_click(self):
         if self.convertCheck:
@@ -164,9 +164,9 @@ class GraphInputWindow(QtWidgets.QMainWindow):
     def zoom(self, check):
         if check:self.scale += 0.1
         else:self.scale -= 0.1
-        pixmap = QtGui.QPixmap("Resources/graph.png")
+        pixmap = QtGui.QPixmap("Resources/graph.svg")
         pixmapSize = pixmap.size()
-        newpixmap = pixmap.scaled(self.scale * pixmapSize, QtCore.Qt.KeepAspectRatio)
+        newpixmap = pixmap.scaled(self.scale * pixmapSize, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         self.frame.setPixmap(newpixmap)
 
     def convert_click(self, v=False):
@@ -242,7 +242,7 @@ class GraphInputWindow(QtWidgets.QMainWindow):
             fileName, _ = QtWidgets.QFileDialog.getSaveFileName(
                 self, "Save Image", r"H:\Image", "All Files (*)", options=options
             )
-            QtGui.QPixmap("Resources/graph.png").save(fileName+".png", "PNG")
+            QtGui.QPixmap("Resources/graph.svg").save(fileName+".svg", "SVG")
         except Exception as e:
             print(e)
             self.error_popup("You should input a graph first!")
