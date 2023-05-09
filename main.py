@@ -133,7 +133,7 @@ class GraphInputWindow(QtWidgets.QMainWindow):
                 self.graphvizGraph.edge("", str(node), label="")
                 self.startNode = node
             elif self.nodeType.currentText() == "Final":
-                self.graphvizGraph.node(node, color="darkgreen", fontcolor="darkgreen")
+                self.graphvizGraph.node(node, color="darkgreen", fontcolor="darkgreen", shape="doublecircle")
                 self.finalNodes.append(node)
             else: self.graphvizGraph.node(node)
             self.nodes.append(node)
@@ -230,10 +230,77 @@ class GraphInputWindow(QtWidgets.QMainWindow):
         self.graphvizGraph.edge("", str([self.startNode]), label="")
         if self.startNode in self.finalNodes: self.finalNodes.append([self.startNode])
         for finNode in self.finalNodes[1:]:
-            self.graphvizGraph.node(str(finNode), color="darkgreen", fontcolor="darkgreen")
+            self.graphvizGraph.node(str(finNode), color="darkgreen", fontcolor="darkgreen", shape="doublecircle")
         self.startNode = ""
         self.finalNodes = []
         self.draw_graph()
+
+    def download_click(self):
+        try:
+            options = QtWidgets.QFileDialog.Options()
+            options |= QtWidgets.QFileDialog.DontUseNativeDialog
+            fileName, _ = QtWidgets.QFileDialog.getSaveFileName(
+                self, "Save Image", r"H:\Image", "All Files (*)", options=options
+            )
+            QtGui.QPixmap("Resources/graph.svg").save(fileName+".svg", "SVG")
+        except Exception as e:
+            print(e)
+            self.error_popup("You should input a graph first!")
+
+
+class CFGInputWindow(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(CFGInputWindow, self).__init__()
+        loadUi(resource_path("UI Files/CFGInput.ui"), self)
+        self.backBtn.clicked.connect(self.back_click)
+        self.graphvizGraph = graphviz.Digraph()
+        self.zoomInBtn.clicked.connect(lambda: self.zoom(True))
+        self.zoomOutBtn.clicked.connect(lambda: self.zoom(False))
+        self.downloadBtn.clicked.connect(self.download_click)
+        lay = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.addWidget(self.frame)
+        self.scrollArea.setWidgetResizable(True)
+        self.frame.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        self.scale = 1.0
+
+    def back_click(self):
+        MainWidget.setCurrentIndex(0)
+
+    def reset_click(self):
+        cleanFiles()
+
+    def draw_graph(self):
+        self.graphvizGraph.save(filename="Resources/graph.dot")
+        dotGraph = pydot.graph_from_dot_file("Resources/graph.dot")[0]
+        self.graphEdges.clear()
+        if len(dotGraph.get_edges()) > 0:
+            for edge in dotGraph.get_edges():
+                if edge.get_source() == '""': continue
+                self.graphEdges[(edge.get_source(), edge.get_destination())].append(edge.get('label').replace('"', "").replace(' ', ""))
+        dotGraph.write_svg("Resources/graph.svg")
+        self.frame.setPixmap(QtGui.QPixmap("Resources/graph.svg"))
+
+    def done_click(self):
+        self.inputMenu.setCurrentIndex(0)
+
+    def error_popup(self,err_msg,extra=""):
+        msg = QtWidgets.QMessageBox()
+        msg.setWindowTitle("Error")
+        msg.setWindowIcon(QtGui.QIcon(resource_path("Resources/logo.png")))
+        msg.setText("An Error Occurred!")
+        msg.setIcon(QtWidgets.QMessageBox.Critical)
+        msg.setInformativeText(err_msg)
+        if extra != "": msg.setDetailedText(extra)
+        x = msg.exec_()
+
+    def zoom(self, check):
+        if check:self.scale += 0.1
+        else:self.scale -= 0.1
+        pixmap = QtGui.QPixmap("Resources/graph.svg")
+        pixmapSize = pixmap.size()
+        newpixmap = pixmap.scaled(self.scale * pixmapSize, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        self.frame.setPixmap(newpixmap)
 
     def download_click(self):
         try:
@@ -254,8 +321,10 @@ if __name__ == "__main__":
     MainWidget = QtWidgets.QStackedWidget()
     MainWindow = MainWindow()
     GraphInputWindow = GraphInputWindow()
+    CFGInputWindow = CFGInputWindow()
     MainWidget.addWidget(MainWindow)
     MainWidget.addWidget(GraphInputWindow)
+    MainWidget.addWidget(CFGInputWindow)
     MainWidget.setFixedSize(1000, 700)
     MainWidget.setWindowTitle("MrAutoMaton")
     MainWidget.setWindowIcon(QtGui.QIcon(resource_path("Resources/logo.png")))

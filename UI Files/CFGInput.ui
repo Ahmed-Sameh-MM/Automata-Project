@@ -52,7 +52,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Please Input your NFA:</string>
+     <string>Please Input your CFG:</string>
     </property>
    </widget>
    <widget class="QStackedWidget" name="inputMenu">
@@ -68,7 +68,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="page">
      <widget class="QWidget" name="verticalLayoutWidget">
@@ -82,103 +82,26 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <item>
-          <widget class="QPushButton" name="addNodesBtn">
-           <property name="text">
-            <string>Add Nodes</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="addEdgesBtn">
-           <property name="text">
-            <string>Add Edges</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <widget class="QPushButton" name="resetBtn">
-           <property name="text">
-            <string>Reset</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="convertBtn">
-           <property name="text">
-            <string>Convert</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="page_2">
-     <widget class="QWidget" name="verticalLayoutWidget_3">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>241</width>
-        <height>81</height>
-       </rect>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_5">
-       <item>
-        <widget class="QLineEdit" name="inputNode">
+        <widget class="QLineEdit" name="inputEdge_2">
+         <property name="text">
+          <string/>
+         </property>
          <property name="placeholderText">
-          <string>NodeName  Ex:1 or 2</string>
+          <string>Format is ( Variable -&gt; Productions )</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="nodeType">
-         <item>
-          <property name="text">
-           <string>Normal</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Starting</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Final</string>
-          </property>
-         </item>
+        <widget class="QPushButton" name="addEdgeBtn_2">
+         <property name="text">
+          <string>Add Rule</string>
+         </property>
         </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
-         <item>
-          <widget class="QPushButton" name="addNodeBtn">
-           <property name="text">
-            <string>Add Node</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="nodeDoneBtn">
-           <property name="text">
-            <string>Done</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
        </item>
       </layout>
      </widget>
     </widget>
-    <widget class="QWidget" name="page_3">
+    <widget class="QWidget" name="page_1">
      <widget class="QWidget" name="verticalLayoutWidget_2">
       <property name="geometry">
        <rect>
@@ -190,29 +113,18 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QLineEdit" name="inputEdge">
-         <property name="placeholderText">
-          <string>Format is (Node,Node,Label)  Ex:1,2,A</string>
+        <widget class="QPushButton" name="addEdgeBtn_3">
+         <property name="text">
+          <string>Add Rules</string>
          </property>
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <item>
-          <widget class="QPushButton" name="addEdgeBtn">
-           <property name="text">
-            <string>Add Edge</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="edgeDoneBtn">
-           <property name="text">
-            <string>Done</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QPushButton" name="addEdgeBtn">
+         <property name="text">
+          <string>Convert To PDA</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
