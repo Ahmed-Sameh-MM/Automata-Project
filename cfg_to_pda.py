@@ -3,11 +3,10 @@ import graphviz
 import copy
 import pydot
 import os
-import atexit
 import sys
 
 
-def cleanFiles():
+def clean_files():
     os.remove("Resources/PDA.png")
     os.remove("Resources/PDA.dot")
 
@@ -25,35 +24,82 @@ def resource_path(relative_path):
 
 class CFG:
     def __init__(self):
-        self.productionRules = defaultdict(lambda: list())
+        self.productionRules = defaultdict(lambda: list(list()))
         self.allSymbols = set()
         self.variables = set()
         self.terminals = set()
         self.startingSymbol = ""
+        self.graphvizGraph = graphviz.Digraph()
 
-    def init_grammar(self, rules):
+    def init_grammar(self, rules, starting_symbol: str = None):
         for ruleInput in rules:
             decompose = ruleInput.split("->")
             variable = decompose[0].strip()
             self.variables.add(variable)
-            production_list = [prod.strip() for prod in decompose[1] if prod.strip() != '']
+            production_list = [prod.strip() for prod in decompose[1] if prod.strip() != '' and prod.strip() != 'ε']
             production_list.reverse()
             self.allSymbols.add(variable)
             for prod in production_list:
                 self.allSymbols.add(prod)
-            self.productionRules[variable] = production_list
+
+            self.productionRules[variable].append(production_list)
 
         for symbol in self.allSymbols:
             if symbol not in self.variables:
                 self.terminals.add(symbol)
 
-        for variable in self.variables:
-            check = True
-            for prod in self.productionRules.values():
-                if variable in prod:
-                    check = False
-            if check:
-                self.startingSymbol = variable
+        if starting_symbol:
+            self.startingSymbol = starting_symbol
+        else:
+            for variable in self.variables:
+                check = True
+                for prod in self.productionRules.values():
+                    if variable in prod:
+                        check = False
+                if check:
+                    self.startingSymbol = variable
+
+    def construct_pda(self):
+        self.graphvizGraph.node("qStart", color="red", fontcolor="red")
+        self.graphvizGraph.node("qAccept", color="darkgreen", fontcolor="darkgreen")
+        self.graphvizGraph.node("qLoop", color="blue", fontcolor="blue")
+
+        self.graphvizGraph.edge("qStart", "q1", label=" (ε, ε -> $)")
+        self.graphvizGraph.edge("q1", "qLoop", label=f" (ε, ε -> {grammar.startingSymbol})")
+        currMaxNode = 2
+
+        for variable, productions in self.productionRules.items():
+            for prod_list in productions:
+                tempProduction = copy.deepcopy(prod_list)
+                popped = False
+                nextNode = "qLoop"
+                while tempProduction:
+                    currNode = nextNode
+                    prod = tempProduction.pop(0)
+                    if len(tempProduction) > 0:
+                        if not popped:
+                            self.graphvizGraph.edge(currNode, f"q{currMaxNode}", label=f" (ε, {variable} -> {prod})")
+                            popped = True
+                        else:
+                            self.graphvizGraph.edge(currNode, f"q{currMaxNode}", label=f" (ε, ε -> {prod})")
+
+                        nextNode = "q" + str(currMaxNode)
+                        currMaxNode += 1
+
+                    elif len(tempProduction) == 0:
+                        if popped:
+                            self.graphvizGraph.edge(currNode, "qLoop", label=f" (ε, ε -> {prod})")
+                        else:
+                            self.graphvizGraph.edge(currNode, "qLoop", label=f" (ε, {variable} -> {prod})")
+
+        for terminal in self.terminals:
+            self.graphvizGraph.edge("qLoop", "qLoop", label=f" ({terminal}, {terminal} -> ε)")
+
+        self.graphvizGraph.edge("qLoop", "qAccept", label=" (ε, $ -> ε)")
+
+        self.graphvizGraph.save(filename="Resources/PDA.dot")
+        dotGraph = pydot.graph_from_dot_file("Resources/PDA.dot")[0]
+        dotGraph.write_png("Resources/PDA.png")
 
     def __str__(self):
         out_str = ""
@@ -66,48 +112,12 @@ class CFG:
 
 if __name__ == "__main__":
 
-    # atexit.register(cleanFiles)
+    # atexit.register(clean_files)
     os.environ["PATH"] += os.pathsep + resource_path('bin')
 
-    rules = ["S -> Aaa", "A -> Bbb", "B -> c"]
-    # rules = ["S -> aSb", "S -> A", "A -> aA", "A -> ε"]
+    # rules = ["S -> Aaa", "A -> Bbb", "B -> c"]
+    rules = ["S -> aSb", "S -> A", "A -> aA", "A -> ε"]
     grammar = CFG()
     grammar.init_grammar(rules)
-    # grammar.startingSymbol = "S"
 
-    graphvizGraph = graphviz.Digraph()
-    graphvizGraph.edge("qStart", "q1", label=" (ε, ε -> $)")
-    graphvizGraph.edge("q1", "qLoop", label=f" (ε, ε -> {grammar.startingSymbol})")
-    currMaxNode = 2
-    for variable, productions in grammar.productionRules.items():
-        tempProduction = copy.deepcopy(productions)
-        popped = False
-        nextNode = "qLoop"
-        while tempProduction:
-            currNode = nextNode
-            prod = tempProduction.pop(0)
-            if len(tempProduction)+1 > 1:
-                if not popped:
-                    graphvizGraph.edge(currNode, f"q{currMaxNode}", label=f" (ε, {variable} -> {prod})")
-                    nextNode = "q"+str(currMaxNode)
-                    currMaxNode += 1
-                    popped = True
-                else:
-                    graphvizGraph.edge(currNode, f"q{currMaxNode}", label=f" (ε, ε -> {prod})")
-                    nextNode = "q"+str(currMaxNode)
-                    currMaxNode += 1
-
-            elif len(tempProduction)+1 == 1:
-                if popped:
-                    graphvizGraph.edge(currNode, "qLoop", label=f" (ε, ε -> {prod})")
-                else:
-                    graphvizGraph.edge(currNode, "qLoop", label=f" (ε, {variable} -> {prod})")
-
-        for terminal in grammar.terminals:
-            graphvizGraph.edge("qLoop", "qLoop", label=f" ({terminal}, {terminal} -> ε)")
-
-    graphvizGraph.edge("qLoop", "qAccept", label=" (ε, $ -> ε)")
-
-    graphvizGraph.save(filename="Resources/PDA.dot")
-    dotGraph = pydot.graph_from_dot_file("Resources/PDA.dot")[0]
-    dotGraph.write_png("Resources/PDA.png")
+    grammar.construct_pda()
