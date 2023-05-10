@@ -75,14 +75,14 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>30</y>
+        <y>20</y>
         <width>261</width>
-        <height>71</height>
+        <height>81</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QLineEdit" name="inputEdge_2">
+        <widget class="QLineEdit" name="inputRules">
          <property name="text">
           <string/>
          </property>
@@ -92,9 +92,16 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="addEdgeBtn_2">
+        <widget class="QPushButton" name="addRuleBtn">
          <property name="text">
           <string>Add Rule</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="doneBtn">
+         <property name="text">
+          <string>Done</string>
          </property>
         </widget>
        </item>
@@ -106,23 +113,30 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>30</y>
+        <y>20</y>
         <width>241</width>
-        <height>64</height>
+        <height>81</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QPushButton" name="addEdgeBtn_3">
+        <widget class="QPushButton" name="addRulesBtn">
          <property name="text">
           <string>Add Rules</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="addEdgeBtn">
+        <widget class="QPushButton" name="convertBtn">
          <property name="text">
           <string>Convert To PDA</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="resetBtn">
+         <property name="text">
+          <string>Reset</string>
          </property>
         </widget>
        </item>

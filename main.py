@@ -5,11 +5,18 @@ import os
 from collections import defaultdict
 import graphviz
 import atexit
+import copy
+import re
 
 
 def cleanFiles():
-    os.remove("Resources/graph.svg")
-    os.remove("Resources/graph.dot")
+    try:
+        os.remove("Resources/graph.svg")
+        os.remove("Resources/graph.dot")
+        os.remove("Resources/PDA.svg")
+        os.remove("Resources/PDA.dot")
+    except Exception:
+        pass
 
 
 def resource_path(relative_path):
@@ -29,9 +36,13 @@ class MainWindow(QtWidgets.QMainWindow):
         loadUi(resource_path("UI Files/MainScreen.ui"), self)
         self.label_2.setPixmap(QtGui.QPixmap(resource_path("Resources/logo.png")))
         self.pushButton.clicked.connect(self.switchWindow)
+        self.pushButton_2.clicked.connect(self.switchWindow2)
 
     def switchWindow(self):
         MainWidget.setCurrentIndex(1)
+
+    def switchWindow2(self):
+        MainWidget.setCurrentIndex(2)
 
 
 class GraphInputWindow(QtWidgets.QMainWindow):
@@ -253,10 +264,16 @@ class CFGInputWindow(QtWidgets.QMainWindow):
         super(CFGInputWindow, self).__init__()
         loadUi(resource_path("UI Files/CFGInput.ui"), self)
         self.backBtn.clicked.connect(self.back_click)
-        self.graphvizGraph = graphviz.Digraph()
+
         self.zoomInBtn.clicked.connect(lambda: self.zoom(True))
         self.zoomOutBtn.clicked.connect(lambda: self.zoom(False))
         self.downloadBtn.clicked.connect(self.download_click)
+        self.doneBtn.clicked.connect(self.done_click)
+        self.addRuleBtn.clicked.connect(self.addRule_click)
+        self.convertBtn.clicked.connect(self.convert_click)
+        self.addRulesBtn.clicked.connect(self.addRules_click)
+        self.resetBtn.clicked.connect(self.reset_click)
+
         lay = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(self.frame)
@@ -264,27 +281,134 @@ class CFGInputWindow(QtWidgets.QMainWindow):
         self.frame.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         self.scale = 1.0
 
+        self.productionRules = defaultdict(lambda: list(list()))
+        self.allSymbols = set()
+        self.variables = set()
+        self.terminals = set()
+        self.startingSymbol = ""
+        self.graphvizGraph = graphviz.Digraph()
+        self.rules = []
+        self.ruleText = ""
+
     def back_click(self):
         MainWidget.setCurrentIndex(0)
 
     def reset_click(self):
+        self.scale = 1.0
+        self.productionRules = defaultdict(lambda: list(list()))
+        self.allSymbols = set()
+        self.variables = set()
+        self.terminals = set()
+        self.startingSymbol = ""
+        self.graphvizGraph = graphviz.Digraph()
+        self.rules = []
+        self.ruleText = ""
         cleanFiles()
+        self.draw_graph()
 
     def draw_graph(self):
-        self.graphvizGraph.save(filename="Resources/graph.dot")
-        dotGraph = pydot.graph_from_dot_file("Resources/graph.dot")[0]
-        self.graphEdges.clear()
-        if len(dotGraph.get_edges()) > 0:
-            for edge in dotGraph.get_edges():
-                if edge.get_source() == '""': continue
-                self.graphEdges[(edge.get_source(), edge.get_destination())].append(edge.get('label').replace('"', "").replace(' ', ""))
-        dotGraph.write_svg("Resources/graph.svg")
-        self.frame.setPixmap(QtGui.QPixmap("Resources/graph.svg"))
+        self.graphvizGraph.save(filename="Resources/PDA.dot")
+        dotGraph = pydot.graph_from_dot_file("Resources/PDA.dot")[0]
+        dotGraph.write_svg("Resources/PDA.svg")
+        self.frame.setPixmap(QtGui.QPixmap("Resources/PDA.svg"))
 
     def done_click(self):
+        self.inputMenu.setCurrentIndex(1)
+
+    def addRules_click(self):
         self.inputMenu.setCurrentIndex(0)
 
-    def error_popup(self,err_msg,extra=""):
+    def initGrammar(self):
+
+        for ruleInput in self.rules:
+            decompose = ruleInput.split("->")
+            variable = decompose[0].strip()
+            self.variables.add(variable)
+            production_list = [prod.strip() for prod in decompose[1] if prod.strip() != '' and prod.strip() != 'ε']
+            production_list.reverse()
+            self.allSymbols.add(variable)
+            for prod in production_list:
+                self.allSymbols.add(prod)
+
+            self.productionRules[variable].append(production_list)
+
+        for symbol in self.allSymbols:
+            if symbol not in self.variables:
+                self.terminals.add(symbol)
+
+        self.startingSymbol = QtWidgets.QInputDialog.getText(MainWindow, "Starting Symbol", f"Enter The starting Symbol for the CFG:")[0]
+
+        if (self.startingSymbol not in self.allSymbols) or (len(self.rules) == 0):
+            self.startingSymbol = ""
+            self.error_popup("Please Make Sure Symbol Exists in CFG!")
+            return False
+        return True
+
+    def printCFG(self):
+        out_str = ""
+        out_str += f"Starting Symbol: {self.startingSymbol}\n"
+        out_str += f"Variables: {self.variables}\n"
+        out_str += f"Terminals: {self.terminals}\n"
+        out_str += f"Production List: {self.productionRules}\n"
+        print(out_str)
+
+    def convert_click(self):
+        if not self.initGrammar():
+            self.error_popup("Please Make sure you have entered a valid CFG")
+            return
+        self.graphvizGraph.attr(rankdir="LR")
+        self.graphvizGraph.node("qStart", color="red", fontcolor="red")
+        self.graphvizGraph.node("qAccept", color="darkgreen", fontcolor="darkgreen", shape="doublecircle")
+        self.graphvizGraph.node("qLoop", color="blue", fontcolor="blue")
+
+        self.graphvizGraph.edge("qStart", "q1", label=" (ε, ε -> $)")
+        self.graphvizGraph.edge("q1", "qLoop", label=f" (ε, ε -> {self.startingSymbol})")
+        currMaxNode = 2
+
+        for variable, productions in self.productionRules.items():
+            for prod_list in productions:
+                tempProduction = copy.deepcopy(prod_list)
+                popped = False
+                nextNode = "qLoop"
+                while tempProduction:
+                    currNode = nextNode
+                    prod = tempProduction.pop(0)
+                    if len(tempProduction) > 0:
+                        if not popped:
+                            self.graphvizGraph.edge(currNode, f"q{currMaxNode}", label=f" (ε, {variable} -> {prod})")
+                            popped = True
+                        else:
+                            self.graphvizGraph.edge(currNode, f"q{currMaxNode}", label=f" (ε, ε -> {prod})")
+
+                        nextNode = "q" + str(currMaxNode)
+                        currMaxNode += 1
+
+                    elif len(tempProduction) == 0:
+                        if popped:
+                            self.graphvizGraph.edge(currNode, "qLoop", label=f" (ε, ε -> {prod})")
+                        else:
+                            self.graphvizGraph.edge(currNode, "qLoop", label=f" (ε, {variable} -> {prod})")
+
+        for terminal in self.terminals:
+            self.graphvizGraph.edge("qLoop", "qLoop", label=f" ({terminal}, {terminal} -> ε)")
+
+        self.graphvizGraph.edge("qLoop", "qAccept", label=" (ε, $ -> ε)")
+        self.draw_graph()
+
+    def addRule_click(self):
+        rule = self.inputRules.text()
+        if not re.match(r"[A-Za-z] -> [A-Za-z]+", rule):
+            self.error_popup("Please Enter Rule in Correct Format!!", "Variable -> Productions\nEx: S -> aAa")
+            return
+        if rule in self.rules:
+            self.error_popup("Rule has already been added")
+            return
+        self.rules.append(rule)
+        self.ruleText += f"{rule}\n"
+        self.graphvizGraph.attr(label=self.ruleText)
+        self.draw_graph()
+
+    def error_popup(self, err_msg, extra=""):
         msg = QtWidgets.QMessageBox()
         msg.setWindowTitle("Error")
         msg.setWindowIcon(QtGui.QIcon(resource_path("Resources/logo.png")))
@@ -297,7 +421,7 @@ class CFGInputWindow(QtWidgets.QMainWindow):
     def zoom(self, check):
         if check:self.scale += 0.1
         else:self.scale -= 0.1
-        pixmap = QtGui.QPixmap("Resources/graph.svg")
+        pixmap = QtGui.QPixmap("Resources/PDA.svg")
         pixmapSize = pixmap.size()
         newpixmap = pixmap.scaled(self.scale * pixmapSize, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         self.frame.setPixmap(newpixmap)
@@ -309,7 +433,7 @@ class CFGInputWindow(QtWidgets.QMainWindow):
             fileName, _ = QtWidgets.QFileDialog.getSaveFileName(
                 self, "Save Image", r"H:\Image", "All Files (*)", options=options
             )
-            QtGui.QPixmap("Resources/graph.svg").save(fileName+".svg", "SVG")
+            QtGui.QPixmap("Resources/PDA.svg").save(fileName+".svg", "SVG")
         except Exception as e:
             print(e)
             self.error_popup("You should input a graph first!")
