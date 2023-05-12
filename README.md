@@ -9,6 +9,13 @@ import os
 from collections import defaultdict
 import graphviz
 import atexit
+import copy
+import re
+```
+
+## Running Program
+```
+Running the program can be done by opening MrAutoMaton.exe executable file found in the EXE folder
 ```
 
 ## [Part 1]
