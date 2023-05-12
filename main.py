@@ -192,6 +192,7 @@ class GraphInputWindow(QtWidgets.QMainWindow):
             while nonVisitedNodes:
                 currNode = nonVisitedNodes.pop()
                 if currNode in visitedNodes: continue
+                if currNode.reverse() in visitedNodes: continue
                 if v:print(f"Curr Node is {currNode}")
                 visitedNodes.append(currNode)
                 if v:print(f"{currNode} added to visited\n")
@@ -206,7 +207,9 @@ class GraphInputWindow(QtWidgets.QMainWindow):
                     self.dfaTable[str(currNode)][str(transition)] = str(nodes)
                     if v:print(f"Adding Rule to table {currNode}\n\t{transition} -> {nodes}\n")
                     if self.finalNodes[0] in nodes: self.finalNodes.append(nodes)
-                    if (nodes in visitedNodes) or (nodes == currNode) or (nodes in nonVisitedNodes):continue
+                    if (nodes in visitedNodes) or (nodes.reverse() in visitedNodes): continue
+                    if (nodes == currNode) or (nodes.reverse() == currNode): continue
+                    if (nodes in nonVisitedNodes) or (nodes.reverse() in nonVisitedNodes):continue
                     if v:print(f"Appending {nodes} to Non Visited Nodes\n")
                     nonVisitedNodes.append(nodes)
                     if v:print(f"Curr Visited Nodes {visitedNodes}")
@@ -230,21 +233,40 @@ class GraphInputWindow(QtWidgets.QMainWindow):
         self.transitionTable = defaultdict(lambda: defaultdict(lambda: list()))
         self.graphvizGraph.clear()
         self.graphEdges.clear()
+        failedFlag = False
         for node, transitionDict in self.dfaTable.items():
             for transition in self.transitions:
                 if self.dfaTable[node][transition]:
                     self.graphvizGraph.edge(str(node), str(self.dfaTable[node][transition]), label=str(" "+transition))
                 else:
                     self.graphvizGraph.edge(str(node), "Failed", label=str(" " + transition))
+                    failedFlag = True
+        if failedFlag:
+            failed = ""
+            for trans in self.transitions:
+                failed += f",{str(trans)}"
+            failed = failed.replace(",", "", 1)
+            self.graphvizGraph.edge("Failed", "Failed", label=str(" " + failed))
+
         self.graphvizGraph.node(str([self.startNode]), color="red", fontcolor="red")
         self.graphvizGraph.node("", width="0.01", height="0.01")
         self.graphvizGraph.edge("", str([self.startNode]), label="")
         if self.startNode in self.finalNodes: self.finalNodes.append([self.startNode])
         for finNode in self.finalNodes[1:]:
             self.graphvizGraph.node(str(finNode), color="darkgreen", fontcolor="darkgreen", shape="doublecircle")
+        self.draw_graph()
+        self.graphEdges = {}
+        self.graphEdges = defaultdict(lambda: list(), self.graphEdges)
         self.startNode = ""
         self.finalNodes = []
-        self.draw_graph()
+        self.nodes = []
+        self.scale = 1.0
+        self.transitionTable = defaultdict(lambda: defaultdict(lambda: list()))
+        self.dfaTable = defaultdict(lambda: defaultdict(lambda: ""))
+        self.transitions = set()
+        self.graphvizGraph.clear()
+        self.graphEdges.clear()
+        cleanFiles()
 
     def download_click(self):
         try:
