@@ -234,6 +234,19 @@
       <normaloff>../Resources/download.png</normaloff>../Resources/download.png</iconset>
     </property>
    </widget>
+   <widget class="QPushButton" name="epsilonBtn">
+    <property name="geometry">
+     <rect>
+      <x>625</x>
+      <y>591</y>
+      <width>41</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Add ε</string>
+    </property>
+   </widget>
    <zorder>inputMenu</zorder>
    <zorder>scrollArea</zorder>
    <zorder>backBtn</zorder>
@@ -241,6 +254,7 @@
    <zorder>zoomInBtn</zorder>
    <zorder>zoomOutBtn</zorder>
    <zorder>downloadBtn</zorder>
+   <zorder>epsilonBtn</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

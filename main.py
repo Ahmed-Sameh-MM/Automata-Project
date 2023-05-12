@@ -295,7 +295,9 @@ class CFGInputWindow(QtWidgets.QMainWindow):
         self.convertBtn.clicked.connect(self.convert_click)
         self.addRulesBtn.clicked.connect(self.addRules_click)
         self.resetBtn.clicked.connect(self.reset_click)
-
+        self.epsilonBtn.clicked.connect(self.epsilon_click)
+        self.epsilonBtn.setDisabled(True)
+        self.epsilonBtn.setHidden(True)
         lay = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(self.frame)
@@ -336,9 +338,13 @@ class CFGInputWindow(QtWidgets.QMainWindow):
 
     def done_click(self):
         self.inputMenu.setCurrentIndex(1)
+        self.epsilonBtn.setDisabled(True)
+        self.epsilonBtn.setHidden(True)
 
     def addRules_click(self):
         self.inputMenu.setCurrentIndex(0)
+        self.epsilonBtn.setDisabled(False)
+        self.epsilonBtn.setHidden(False)
 
     def initGrammar(self):
 
@@ -346,7 +352,7 @@ class CFGInputWindow(QtWidgets.QMainWindow):
             decompose = ruleInput.split("->")
             variable = decompose[0].strip()
             self.variables.add(variable)
-            production_list = [prod.strip() for prod in decompose[1] if prod.strip() != '' and prod.strip() != 'ε']
+            production_list = [prod.strip() for prod in decompose[1] if prod.strip() != '']
             production_list.reverse()
             self.allSymbols.add(variable)
             for prod in production_list:
@@ -412,6 +418,7 @@ class CFGInputWindow(QtWidgets.QMainWindow):
                             self.graphvizGraph.edge(currNode, "qLoop", label=f" (ε, {variable} -> {prod})")
 
         for terminal in self.terminals:
+            if terminal == "ε": continue
             self.graphvizGraph.edge("qLoop", "qLoop", label=f" ({terminal}, {terminal} -> ε)")
 
         self.graphvizGraph.edge("qLoop", "qAccept", label=" (ε, $ -> ε)")
@@ -419,7 +426,7 @@ class CFGInputWindow(QtWidgets.QMainWindow):
 
     def addRule_click(self):
         rule = self.inputRules.text()
-        if not re.match(r"[A-Za-z] -> [A-Za-z]+", rule):
+        if not re.fullmatch(r"[A-Za-z]+ -> ([A-Za-z]+|ε)", rule):
             self.error_popup("Please Enter Rule in Correct Format!!", "Variable -> Productions\nEx: S -> aAa")
             return
         if rule in self.rules:
@@ -459,6 +466,10 @@ class CFGInputWindow(QtWidgets.QMainWindow):
         except Exception as e:
             print(e)
             self.error_popup("You should input a graph first!")
+
+    def epsilon_click(self):
+        newText = f"{self.inputRules.text()} -> ε"
+        self.inputRules.setText(newText)
 
 
 if __name__ == "__main__":
